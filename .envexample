@@ -1,0 +1,10 @@
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/quadraz"
+
+MAIL_DRIVER=ses
+AWS_ACCESS_KEY_ID=AKIA47CRUWDAHZC5RUSG
+AWS_SECRET_ACCESS_KEY=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
+region=us-east-1
+
+STORAGE_DRIVER=s3
+S3_BUCKET=quadraz
+S3_BUCKET_URL=https://quadraz.s3.us-east-2.amazonaws.com
