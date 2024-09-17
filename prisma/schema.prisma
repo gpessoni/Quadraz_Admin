@@ -9,7 +9,7 @@ datasource db {
 
 generator erd {
     provider = "prisma-erd-generator"
-    output   = "ERD.svg"
+    output   = "ERD.png"
 }
 
 model Client {
