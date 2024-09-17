@@ -1,0 +1,104 @@
+[
+    {
+        "name": "Futebol de campo",
+        "heightOfficial": 105,
+        "widthOfficial": 68,
+        "sport": "Futebol"
+    },
+    {
+        "name": "Futebol de salão",
+        "heightOfficial": 38,
+        "widthOfficial": 18,
+        "sport": "Futebol"
+    },
+    {
+        "name": "Futebol de areia",
+        "heightOfficial": 36,
+        "widthOfficial": 27,
+        "sport": "Futebol"
+    },
+    {
+        "name": "Futebol americano",
+        "heightOfficial": 120,
+        "widthOfficial": 53,
+        "sport": "Futebol Americano"
+    },
+    {
+        "name": "Basquete",
+        "heightOfficial": 28,
+        "widthOfficial": 15,
+        "sport": "Basquete"
+    },
+    {
+        "name": "Basquete 3x3",
+        "heightOfficial": 15,
+        "widthOfficial": 11,
+        "sport": "Basquete"
+    },
+    {
+        "name": "Vôlei de quadra",
+        "heightOfficial": 18,
+        "widthOfficial": 9,
+        "sport": "Vôlei"
+    },
+    {
+        "name": "Vôlei de praia",
+        "heightOfficial": 16,
+        "widthOfficial": 8,
+        "sport": "Vôlei"
+    },
+    {
+        "name": "Tênis de quadra",
+        "heightOfficial": 23.77,
+        "widthOfficial": 8.23,
+        "sport": "Tênis"
+    },
+    {
+        "name": "Tênis de mesa",
+        "heightOfficial": 2.74,
+        "widthOfficial": 1.525,
+        "sport": "Tênis"
+    },
+    {
+        "name": "Badminton",
+        "heightOfficial": 13.4,
+        "widthOfficial": 5.18,
+        "sport": "Badminton"
+    },
+    {
+        "name": "Handebol",
+        "heightOfficial": 40,
+        "widthOfficial": 20,
+        "sport": "Handebol"
+    },
+    {
+        "name": "Rugby",
+        "heightOfficial": 100,
+        "widthOfficial": 70,
+        "sport": "Rugby"
+    },
+    {
+        "name": "Hóquei",
+        "heightOfficial": 91.4,
+        "widthOfficial": 55,
+        "sport": "Hóquei"
+    },
+    {
+        "name": "Polo",
+        "heightOfficial": 274,
+        "widthOfficial": 146,
+        "sport": "Polo"
+    },
+    {
+        "name": "Polo aquático",
+        "heightOfficial": 30,
+        "widthOfficial": 20,
+        "sport": "Polo aquático"
+    },
+    {
+        "name": "Skate",
+        "heightOfficial": 0,
+        "widthOfficial": 0,
+        "sport": "Skate"
+    }
+]

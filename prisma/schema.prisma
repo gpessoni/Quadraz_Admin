@@ -1,0 +1,240 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator erd {
+    provider = "prisma-erd-generator"
+    output   = "ERD.svg"
+}
+
+model Client {
+    id        String   @id @default(uuid())
+    name      String   @unique
+    cnpj      String   @unique
+    cpf       String   @unique
+    email     String   @unique
+    birthDate DateTime
+    address   String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Images {
+    id            String       @id @default(uuid())
+    url           String
+    sportCenterId String?
+    courtId       String?
+    SportCenter   SportCenter? @relation(fields: [sportCenterId], references: [id])
+    court         Court?       @relation(fields: [courtId], references: [id])
+}
+
+model SportCenter {
+    id              String  @id @default(uuid())
+    name            String  @unique
+    description     String?
+    logo            String?
+    address         String
+    number          String
+    neighborhood    String
+    city            String
+    state           String
+    country         String
+    email           String  @unique
+    phone           String
+    hasWifi         Boolean
+    wifiPassword    String?
+    hasParking      Boolean
+    parkingCapacity Int
+    hasPlayground   Boolean
+    playgroundObs   String?
+
+    opensOnHolidays Boolean
+
+    restaurants Restaurant[]
+    Locker      Locker[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    Court     Court[]
+
+    Images               Images[]
+    SpecialSchedule      SpecialSchedule[]
+    SportCenterEquipment SportCenterEquipment[]
+}
+
+model Court {
+    id                 String  @id @default(uuid())
+    name               String  @unique
+    hasLight           Boolean
+    hasRoof            Boolean
+    width              Int
+    height             Int
+    hasGrandstand      Boolean
+    grandstandCapacity Int
+
+    sports SportTypes[]
+
+    floorId String
+    floor   Floor  @relation(fields: [floorId], references: [id])
+
+    sportCenterId String
+    sportCenter   SportCenter @relation(fields: [sportCenterId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    schedules       CourtSchedule[]
+    priceTable      PriceTable[]
+    SpecialSchedule SpecialSchedule[]
+    Images          Images[]
+    scheduleTypes   ScheduleType[]
+}
+
+model ScheduleType {
+    id        String   @id @default(uuid())
+    name      String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    Court Court[]
+}
+
+model PriceTable {
+    id          String  @id @default(uuid())
+    description String
+    price       Decimal
+
+    Court   Court  @relation(fields: [courtId], references: [id])
+    courtId String
+}
+
+model CourtSchedule {
+    id        String @id @default(uuid())
+    dayOfWeek String
+    startTime String
+    endTime   String
+
+    courtId String
+    court   Court  @relation(fields: [courtId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model SpecialSchedule {
+    id          String  @id @default(uuid())
+    day         Int
+    description String?
+    startTime   String
+    endTime     String
+
+    courtId String?
+    court   Court?  @relation(fields: [courtId], references: [id])
+
+    sportCenterId String?
+    SportCenter   SportCenter? @relation(fields: [sportCenterId], references: [id])
+}
+
+model Sports {
+    id        String       @id @default(uuid())
+    name      String       @unique
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
+    courts    SportTypes[]
+}
+
+model Floor {
+    id        String   @id @default(uuid())
+    name      String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    Court     Court[]
+}
+
+model SportTypes {
+    id   String @id @default(uuid())
+    name String @unique
+
+    heightOfficial Int
+    widthOfficial  Int
+
+    sportId String
+    sport   Sports @relation(fields: [sportId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    Court     Court[]
+}
+
+model Restaurant {
+    id            String      @id @default(uuid())
+    sportCenterId String
+    sportCenter   SportCenter @relation(fields: [sportCenterId], references: [id])
+    hasAlcohol    Boolean
+    hasNonAlcohol Boolean
+    hasSnacks     Boolean
+    hasSandwich   Boolean
+    hasSkewer     Boolean
+    observation   String?
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+}
+
+model Locker {
+    id            String      @id @default(uuid())
+    sportCenterId String
+    sportCenter   SportCenter @relation(fields: [sportCenterId], references: [id])
+    hasLocker     Boolean
+    hasShower     Boolean
+    hasTowel      Boolean
+    hasToiletries Boolean
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+}
+
+model Equipment {
+    id                   String                 @id @default(uuid())
+    name                 String                 @unique
+    createdAt            DateTime               @default(now())
+    updatedAt            DateTime               @updatedAt
+    SportCenterEquipment SportCenterEquipment[]
+}
+
+model SportCenterEquipment {
+    id       String @id @default(uuid())
+    quantity Int
+    price    Float
+    loans    Loan[]
+
+    sportCenter   SportCenter @relation(fields: [sportCenterId], references: [id])
+    equipment     Equipment   @relation(fields: [equipmentId], references: [id])
+    sportCenterId String
+    equipmentId   String
+
+    createdAt DateTime @default(now())
+}
+
+model Loan {
+    id         String     @id @default(uuid())
+    quantity   Int
+    status     LoanStatus
+    loanDate   DateTime
+    returnDate DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    SportCenterEquipment   SportCenterEquipment? @relation(fields: [sportCenterEquipmentId], references: [id])
+    sportCenterEquipmentId String?
+}
+
+enum LoanStatus {
+    LOANED
+    RETURNED
+}
