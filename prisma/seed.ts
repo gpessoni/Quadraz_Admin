@@ -16,24 +16,31 @@ async function main() {
     const sportsType = await getDataFromFile("sportsType.json")
     const equipments = await getDataFromFile("equipments.json")
 
+    // Register floors
     for (const floorData of floorsData) {
-        await prisma.floor.create({
+        const createdFloor = await prisma.floor.create({
             data: floorData,
         })
+        console.log(`Created floor: ${createdFloor.name}`)
     }
 
+    // Register sports
     for (const sportData of sportsData) {
-        await prisma.sports.create({
+        const createdSport = await prisma.sports.create({
             data: sportData,
         })
+        console.log(`Created sport: ${createdSport.name}`)
     }
 
+    // Register equipment
     for (const equipment of equipments) {
-        await prisma.equipment.create({
+        const createdEquipment = await prisma.equipment.create({
             data: equipment,
         })
+        console.log(`Created equipment: ${createdEquipment.name}`)
     }
 
+    // Register sport types
     for (const sportType of sportsType) {
         if (!sportType.sport) {
             console.error(`Invalid sport name for ${sportType.name}`)
@@ -51,7 +58,7 @@ async function main() {
             continue
         }
 
-        await prisma.sportTypes.create({
+        const createdSportType = await prisma.sportTypes.create({
             data: {
                 name: sportType.name,
                 heightOfficial: sportType.heightOfficial,
@@ -63,6 +70,7 @@ async function main() {
                 },
             },
         })
+        console.log(`Created sport type: ${createdSportType.name} for sport: ${sport.name}`)
     }
 }
 
