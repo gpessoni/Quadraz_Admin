@@ -15,22 +15,36 @@ import { Toolbar } from "primereact/toolbar"
 import { useEffect, useRef, useState } from "react"
 import Navbar from "@/components/navbar"
 import "primereact/resources/themes/lara-light-cyan/theme.css"
+import { Dropdown } from "primereact/dropdown" // Dropdown importada para seleção de esporte
 
-type CourtTypeProduct = {
-    id: string | null
+type sport = {
+    id: string
     name: string
-    createdAt?: Date
-    updatedAt?: Date
 }
 
-export default function CourtTypeProducts() {
+type sportType = {
+    id: string | null
+    name: string
+    heightOfficial?: number
+    widthOfficial?: number
+    createdAt?: Date
+    updatedAt?: Date
+    sportId: string
+    sport?: sport
+}
+
+export default function SportType() {
     const [loading, setLoading] = useState<boolean>(true)
-    const [courtsType, setCourtsType] = useState<CourtTypeProduct[]>([])
+    const [courtsType, setCourtsType] = useState<sportType[]>([])
     const [courtTypeDialog, setCourtTypeDialog] = useState<boolean>(false)
-    const [courtType, setCourtType] = useState<CourtTypeProduct>({
+    const [courtType, setCourtType] = useState<sportType>({
         id: null,
         name: "",
+        heightOfficial: 0,
+        widthOfficial: 0,
+        sportId: "",
     })
+    const [sports, setSports] = useState<sport[]>([]) // Estado para os esportes
     const [submitted, setSubmitted] = useState<boolean>(false)
     const toast = useRef<Toast>(null)
 
@@ -40,24 +54,19 @@ export default function CourtTypeProducts() {
         updatedAt: { value: null, matchMode: "contains" },
     })
 
-    const onFilterChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-        const newFilters: any = { ...filters }
-        newFilters[field].value = e.target.value
-        setFilters(newFilters)
-    }
+    useEffect(() => {
+        fetchCourtsType()
+        fetchSports() // Buscar os esportes
+        setLoading(false)
+    }, [])
 
     const getAuthToken = () => {
         return localStorage.getItem("authToken") || ""
     }
 
-    useEffect(() => {
-        fetchCourtsType()
-        setLoading(false)
-    }, [])
-
     const fetchCourtsType = async () => {
         try {
-            const response = await fetch("/api/floor/list", {
+            const response = await fetch("/api/sport-type/list", {
                 headers: {
                     Authorization: `Bearer ${getAuthToken()}`,
                 },
@@ -65,11 +74,137 @@ export default function CourtTypeProducts() {
             const data = await response.json()
             setCourtsType(data)
         } catch (error) {
-            console.error("Erro ao buscar Tipos de Quadras:", error)
+            console.error("Erro ao buscar Tipos de Esportes:", error)
             toast.current?.show({
                 severity: "error",
                 summary: "Erro",
-                detail: "Erro ao buscar Tipos de Quadras",
+                detail: "Erro ao buscar Tipos de Esportes",
+                life: 3000,
+            })
+        }
+    }
+
+    const fetchSports = async () => {
+        try {
+            const response = await fetch("/api/sports/list", {
+                headers: {
+                    Authorization: `Bearer ${getAuthToken()}`,
+                },
+            })
+            const data = await response.json()
+            setSports(data)
+        } catch (error) {
+            console.error("Erro ao buscar Esportes:", error)
+            toast.current?.show({
+                severity: "error",
+                summary: "Erro",
+                detail: "Erro ao buscar Esportes",
+                life: 3000,
+            })
+        }
+    }
+
+    const openNew = () => {
+        setCourtType({ id: null, name: "", heightOfficial: undefined, widthOfficial: undefined, sportId: "" })
+        setSubmitted(false)
+        setCourtTypeDialog(true)
+    }
+
+    const hideDialog = () => {
+        setSubmitted(false)
+        setCourtTypeDialog(false)
+    }
+
+    const saveCourtType = async () => {
+        setSubmitted(true)
+
+        if (courtType.name.trim() && courtType.sportId) {
+            let _courtsType = [...courtsType]
+            try {
+                const isUpdating = !!courtType.id
+                const response = await fetch(isUpdating ? `/api/sport-type/update/${courtType.id}` : "/api/sport-type/create", {
+                    method: isUpdating ? "PUT" : "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${getAuthToken()}`,
+                    },
+                    body: JSON.stringify(courtType),
+                })
+
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    const errorMessage = errorData.error || "Erro ao salvar Tipo de Esporte"
+                    throw new Error(errorMessage)
+                }
+
+                const result = await response.json()
+                if (!isUpdating) {
+                    _courtsType.push(result)
+                } else {
+                    _courtsType[_courtsType.findIndex((g) => g.id === courtType.id)] = result
+                }
+
+                toast.current?.show({
+                    severity: "success",
+                    summary: "Sucesso",
+                    detail: isUpdating ? "Tipo de Esporte atualizado com sucesso" : "Tipo de Esporte criado com sucesso",
+                    life: 3000,
+                })
+                setCourtsType(_courtsType)
+                setCourtTypeDialog(false)
+                setCourtType({ id: null, name: "", heightOfficial: undefined, widthOfficial: undefined, sportId: "" })
+            } catch (error) {
+                console.error("Erro ao salvar Tipo de Esporte:", error)
+                const errorMessage = error instanceof Error ? error.message : "Erro desconhecido ao salvar Tipo de Esporte"
+                toast.current?.show({
+                    severity: "error",
+                    summary: "Erro",
+                    detail: errorMessage,
+                    life: 4000,
+                })
+            }
+        } else {
+            toast.current?.show({
+                severity: "warn",
+                summary: "Atenção",
+                detail: "Preencha todos os campos obrigatórios.",
+                life: 3000,
+            })
+        }
+    }
+
+    const editCourtType = (courtType: sportType) => {
+        setCourtType({ ...courtType })
+        setCourtTypeDialog(true)
+    }
+
+    const deleteCourtType = async (courtType: sportType) => {
+        try {
+            const response = await fetch(`/api/sport-type/delete/${courtType.id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${getAuthToken()}`,
+                },
+            })
+
+            if (response.ok) {
+                let _courtsType = courtsType.filter((val) => val.id !== courtType.id)
+                setCourtsType(_courtsType)
+                toast.current?.show({
+                    severity: "success",
+                    summary: "Sucesso",
+                    detail: "Tipo de Esporte deletado com sucesso",
+                    life: 3000,
+                })
+            } else {
+                throw new Error("Erro ao deletar Tipo de Esporte")
+            }
+        } catch (error) {
+            console.error("Erro ao deletar Tipo de Esporte:", error)
+            toast.current?.show({
+                severity: "error",
+                summary: "Erro",
+                detail: "Erro ao deletar Tipo de Esporte",
                 life: 3000,
             })
         }
@@ -98,114 +233,6 @@ export default function CourtTypeProducts() {
         )
     }
 
-    const openNew = () => {
-        setCourtType({ id: null, name: "" })
-        setSubmitted(false)
-        setCourtTypeDialog(true)
-    }
-
-    const hideDialog = () => {
-        setSubmitted(false)
-        setCourtTypeDialog(false)
-    }
-
-    const saveCourtType = async () => {
-        setSubmitted(true)
-
-        if (courtType.name.trim()) {
-            let _courtsType = [...courtsType]
-            try {
-                console.log("Payload enviado:", JSON.stringify(courtType))
-
-                const isUpdating = !!courtType.id
-                const response = await fetch(isUpdating ? `/api/floor/update/${courtType.id}` : "/api/floor/create", {
-                    method: isUpdating ? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${getAuthToken()}`,
-                    },
-                    body: JSON.stringify(isUpdating ? courtType : { name: courtType.name }),
-                })
-
-                if (!response.ok) {
-                    const errorData = await response.json()
-                    const errorMessage = errorData.error || "Erro ao salvar Tipo de Quadras"
-                    throw new Error(errorMessage)
-                }
-
-                const result = await response.json()
-                if (!isUpdating) {
-                    _courtsType.push(result)
-                } else {
-                    _courtsType[_courtsType.findIndex((g) => g.id === courtType.id)] = result
-                }
-
-                toast.current?.show({
-                    severity: "success",
-                    summary: "Sucesso",
-                    detail: isUpdating ? "Tipo de Quadras atualizado com sucesso" : "Tipo de Quadras criado com sucesso",
-                    life: 3000,
-                })
-                setCourtsType(_courtsType)
-                setCourtTypeDialog(false)
-                setCourtType({ id: null, name: "" })
-            } catch (error) {
-                console.error("Erro ao salvar Tipo de Quadras:", error)
-                const errorMessage = error instanceof Error ? error.message : "Erro desconhecido ao salvar Tipo de Quadras"
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Erro",
-                    detail: errorMessage,
-                    life: 4000,
-                })
-            }
-        } else {
-            toast.current?.show({
-                severity: "warn",
-                summary: "Atenção",
-                detail: "Preencha todos os campos obrigatórios.",
-                life: 3000,
-            })
-        }
-    }
-
-    const editCourtType = (courtType: CourtTypeProduct) => {
-        setCourtType({ ...courtType })
-        setCourtTypeDialog(true)
-    }
-
-    const deleteCourtType = async (courtType: CourtTypeProduct) => {
-        try {
-            const response = await fetch(`/api/floor/delete/${courtType.id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${getAuthToken()}`,
-                },
-            })
-
-            if (response.ok) {
-                let _courtsType = courtsType.filter((val) => val.id !== courtType.id)
-                setCourtsType(_courtsType)
-                toast.current?.show({
-                    severity: "success",
-                    summary: "Sucesso",
-                    detail: "Tipo de Quadras deletado com sucesso",
-                    life: 3000,
-                })
-            } else {
-                throw new Error("Erro ao deletar Tipo de Quadras")
-            }
-        } catch (error) {
-            console.error("Erro ao deletar Tipo de Quadras:", error)
-            toast.current?.show({
-                severity: "error",
-                summary: "Erro",
-                detail: "Erro ao deletar Tipo de Quadras",
-                life: 3000,
-            })
-        }
-    }
-
     const courtTypeDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-danger" onClick={hideDialog} />
@@ -219,7 +246,7 @@ export default function CourtTypeProducts() {
 
     return (
         <>
-            <Navbar />
+           <Navbar />
             <Toast ref={toast} />
             <div className="card">
                 <Toolbar className="p-mb-4 p-toolbar" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
@@ -227,7 +254,7 @@ export default function CourtTypeProducts() {
                     filters={filters}
                     onFilter={(e) => setFilters(e.filters as DataTableFilterMeta)}
                     globalFilterFields={["name", "createdAt", "updatedAt"]}
-                    header="Tipos de Quadras"
+                    header="Tipos de Esportes"
                     style={{
                         width: "100%",
                         overflow: "auto",
@@ -239,29 +266,12 @@ export default function CourtTypeProducts() {
                     rowsPerPageOptions={[7, 10, 25, 50]}
                 >
                     <Column align="center" field="name" header="Tipo" sortable></Column>
+                    <Column align="center" field="heightOfficial" header="Altura Oficial" sortable></Column>
+                    <Column align="center" field="widthOfficial" header="Largura Oficial" sortable></Column>
+                    <Column align="center" field="sport.name" header="Esporte" sortable></Column>
                     <Column
                         align="center"
-                        field="createdAt"
-                        header="Data de Criação"
-                        body={(rowData) => {
-                            const date = new Date(rowData.createdAt)
-                            return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
-                        }}
-                        sortable
-                    ></Column>
-                    <Column
-                        align="center"
-                        field="updatedAt"
-                        header="Data de Atualização"
-                        body={(rowData) => {
-                            const date = new Date(rowData.updatedAt)
-                            return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
-                        }}
-                        sortable
-                    ></Column>
-                    <Column
-                        align="center"
-                        body={(rowData: CourtTypeProduct) => (
+                        body={(rowData: sportType) => (
                             <>
                                 <div style={{ display: "flex", flexWrap: "nowrap" }}>
                                     <Button
@@ -272,44 +282,63 @@ export default function CourtTypeProducts() {
                                     <DeleteButton
                                         item={rowData}
                                         onDelete={deleteCourtType}
-                                        message={`Você tem certeza que deseja deletar o tipo de chão ${rowData.name}?`}
+                                        message={`Você tem certeza que deseja deletar o tipo de esporte ${rowData.name}?`}
                                         header="Confirmação"
                                     />
                                 </div>
                             </>
                         )}
-                    />
+                    />{" "}
                 </DataTable>
 
                 <Dialog
                     visible={courtTypeDialog}
                     style={{ width: "450px" }}
-                    draggable={false}
-                    header="Detalhes do Tipo de Quadras"
+                    header="Tipo de Esporte"
                     modal
                     className="p-fluid"
                     footer={courtTypeDialogFooter}
                     onHide={hideDialog}
                 >
-                    <div
-                        className="field"
-                        style={{
-                            marginTop: "10px",
-                        }}
-                    >
-                        <label htmlFor="description">Tipo de Chão</label>
+                    <div className="field">
+                        <label htmlFor="name">Nome</label>
                         <InputText
-                            id="description"
+                            id="name"
                             value={courtType.name}
                             onChange={(e) => setCourtType({ ...courtType, name: e.target.value })}
-                            style={{
-                                marginTop: "10px",
-                            }}
                             required
-                            className={submitted && !courtType.name ? "p-invalid" : ""}
+                            autoFocus
+                        />
+                    </div>
+                    <div className="field">
+                        <label htmlFor="heightOfficial">Altura Oficial</label>
+                        <InputText
+                            id="heightOfficial"
+                            value={courtType.heightOfficial?.toString() || "0"}
+                            onChange={(e) => setCourtType({ ...courtType, heightOfficial: parseFloat(e.target.value) })}
+                        />
+                    </div>
+                    <div className="field">
+                        <label htmlFor="widthOfficial">Largura Oficial</label>
+                        <InputText
+                            id="widthOfficial"
+                            value={courtType.widthOfficial?.toString() || "0"}
+                            onChange={(e) => setCourtType({ ...courtType, widthOfficial: parseFloat(e.target.value) })}
+                        />
+                    </div>
+                    <div className="field">
+                        <label htmlFor="sport">Esporte</label>
+                        <Dropdown
+                            id="sport"
+                            value={courtType.sportId}
+                            options={sports}
+                            onChange={(e) => setCourtType({ ...courtType, sportId: e.value })}
+                            optionLabel="name"
+                            placeholder="Selecione um Esporte"
                         />
                     </div>
                 </Dialog>
+
                 <ConfirmDialog />
             </div>
         </>
