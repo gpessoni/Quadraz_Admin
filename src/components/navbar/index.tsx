@@ -1,6 +1,18 @@
 import React, { useRef, useState } from "react"
 import * as S from "./styled"
-import { faBars, faCog, faUsers, faFutbol, faCalendarAlt, faHome, faSignOutAlt } from "@fortawesome/free-solid-svg-icons"
+import {
+    faBars,
+    faCog,
+    faUsers,
+    faFutbol,
+    faCalendarAlt,
+    faHome,
+    faSignOutAlt,
+    faUserShield,
+    faToolbox,
+    faThLarge,
+    faRunning,
+} from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 const AdminNavbar = () => {
@@ -42,16 +54,13 @@ const AdminNavbar = () => {
                         <FontAwesomeIcon icon={faHome} /> Dashboard
                     </S.NavLink>
                     <S.NavLink href="/admin/courts">
-                        <FontAwesomeIcon icon={faFutbol} /> Quadras
+                        <FontAwesomeIcon icon={faFutbol} /> Centros Esportivos
                     </S.NavLink>
                     <S.NavLink href="/admin/bookings">
                         <FontAwesomeIcon icon={faCalendarAlt} /> Reservas
                     </S.NavLink>
                     <S.NavLink href="/admin/clients">
                         <FontAwesomeIcon icon={faUsers} /> Clientes
-                    </S.NavLink>
-                    <S.NavLink href="/admin/settings">
-                        <FontAwesomeIcon icon={faCog} /> Configurações
                     </S.NavLink>
                 </S.NavLinks>
             )}
@@ -62,8 +71,21 @@ const AdminNavbar = () => {
                         <FontAwesomeIcon icon={faCog} />
                     </S.CogIcon>
                     <S.OptionsMenu showOptions={showOptions}>
-                        <S.OptionItem href="/admin/profile">Perfil</S.OptionItem>
-                        <S.OptionItem href="/admin/settings">Configurações</S.OptionItem>
+                        <S.OptionItem href="/roles">
+                            <FontAwesomeIcon icon={faUserShield} /> Cargos
+                        </S.OptionItem>
+                        <S.OptionItem href="/equipaments">
+                            <FontAwesomeIcon icon={faToolbox} /> Equipamentos
+                        </S.OptionItem>
+                        <S.OptionItem href="/courts_types">
+                            <FontAwesomeIcon icon={faThLarge} /> Tipos de Quadras
+                        </S.OptionItem>
+                        <S.OptionItem href="/sports">
+                            <FontAwesomeIcon icon={faFutbol} /> Esportes
+                        </S.OptionItem>
+                        <S.OptionItem href="/sports_types">
+                            <FontAwesomeIcon icon={faRunning} /> Tipos de Esportes
+                        </S.OptionItem>
                         <S.OptionItem href="/admin/logout">
                             <FontAwesomeIcon icon={faSignOutAlt} /> Sair
                         </S.OptionItem>
