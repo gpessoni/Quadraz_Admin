@@ -115,16 +115,18 @@ export default function CourtTypeProducts() {
         if (courtType.name.trim()) {
             let _courtsType = [...courtsType]
             try {
-                console.log("Payload enviado:", JSON.stringify(courtType))
-
                 const isUpdating = !!courtType.id
+
+                // Filtra os campos proibidos antes de enviar
+                const { id, createdAt, updatedAt, ...courtTypeData } = courtType
+
                 const response = await fetch(isUpdating ? `/api/floor/update/${courtType.id}` : "/api/floor/create", {
                     method: isUpdating ? "PUT" : "POST",
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${getAuthToken()}`,
                     },
-                    body: JSON.stringify(isUpdating ? courtType : { name: courtType.name }),
+                    body: JSON.stringify(isUpdating ? courtTypeData : { name: courtType.name }),
                 })
 
                 if (!response.ok) {

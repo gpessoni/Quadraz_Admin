@@ -16,8 +16,6 @@ export default async function createCourtService(req: NextApiRequest, res: NextA
 
         const { name, hasLight, hasRoof, sports, hasGrandstand, grandstandCapacity, width, height, floorId, sportCenterId } = req.body
 
-        console.log(req.body)
-
         const sportCenter = await prisma.sportCenter.findUnique({
             where: {
                 id: sportCenterId,
