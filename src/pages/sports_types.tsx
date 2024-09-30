@@ -29,7 +29,7 @@ type sportType = {
     widthOfficial?: number
     createdAt?: Date
     updatedAt?: Date
-    sportId: string
+    sportId: any
     sport?: sport
 }
 
@@ -56,7 +56,7 @@ export default function SportType() {
 
     useEffect(() => {
         fetchCourtsType()
-        fetchSports() // Buscar os esportes
+        fetchSports()
         setLoading(false)
     }, [])
 
@@ -122,13 +122,23 @@ export default function SportType() {
             let _courtsType = [...courtsType]
             try {
                 const isUpdating = !!courtType.id
+                let payload: any = {
+                    name: courtType.name,
+                    heightOfficial: courtType.heightOfficial,
+                    widthOfficial: courtType.widthOfficial,
+                }
+
+                if (!isUpdating) {
+                    payload.sportId = courtType.sportId.id
+                }
+
                 const response = await fetch(isUpdating ? `/api/sport-type/update/${courtType.id}` : "/api/sport-type/create", {
                     method: isUpdating ? "PUT" : "POST",
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${getAuthToken()}`,
                     },
-                    body: JSON.stringify(courtType),
+                    body: JSON.stringify(payload),
                 })
 
                 if (!response.ok) {
@@ -153,6 +163,7 @@ export default function SportType() {
                 setCourtsType(_courtsType)
                 setCourtTypeDialog(false)
                 setCourtType({ id: null, name: "", heightOfficial: undefined, widthOfficial: undefined, sportId: "" })
+                fetchCourtsType()
             } catch (error) {
                 console.error("Erro ao salvar Tipo de Esporte:", error)
                 const errorMessage = error instanceof Error ? error.message : "Erro desconhecido ao salvar Tipo de Esporte"
@@ -246,7 +257,7 @@ export default function SportType() {
 
     return (
         <>
-           <Navbar />
+            <Navbar />
             <Toast ref={toast} />
             <div className="card">
                 <Toolbar className="p-mb-4 p-toolbar" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
@@ -295,12 +306,13 @@ export default function SportType() {
                     visible={courtTypeDialog}
                     style={{ width: "450px" }}
                     header="Tipo de Esporte"
+                    draggable={false}
                     modal
                     className="p-fluid"
                     footer={courtTypeDialogFooter}
                     onHide={hideDialog}
                 >
-                    <div className="field">
+                    <div className="field" style={{ marginBottom: "1rem" }}>
                         <label htmlFor="name">Nome</label>
                         <InputText
                             id="name"
@@ -310,7 +322,8 @@ export default function SportType() {
                             autoFocus
                         />
                     </div>
-                    <div className="field">
+
+                    <div className="field" style={{ marginBottom: "1rem" }}>
                         <label htmlFor="heightOfficial">Altura Oficial</label>
                         <InputText
                             id="heightOfficial"
@@ -318,7 +331,8 @@ export default function SportType() {
                             onChange={(e) => setCourtType({ ...courtType, heightOfficial: parseFloat(e.target.value) })}
                         />
                     </div>
-                    <div className="field">
+
+                    <div className="field" style={{ marginBottom: "1rem" }}>
                         <label htmlFor="widthOfficial">Largura Oficial</label>
                         <InputText
                             id="widthOfficial"
@@ -326,17 +340,20 @@ export default function SportType() {
                             onChange={(e) => setCourtType({ ...courtType, widthOfficial: parseFloat(e.target.value) })}
                         />
                     </div>
-                    <div className="field">
-                        <label htmlFor="sport">Esporte</label>
-                        <Dropdown
-                            id="sport"
-                            value={courtType.sportId}
-                            options={sports}
-                            onChange={(e) => setCourtType({ ...courtType, sportId: e.value })}
-                            optionLabel="name"
-                            placeholder="Selecione um Esporte"
-                        />
-                    </div>
+
+                    {!courtType.id && (
+                        <div className="field" style={{ marginBottom: "1rem" }}>
+                            <label htmlFor="sport">Esporte</label>
+                            <Dropdown
+                                id="sport"
+                                value={courtType.sportId}
+                                options={sports}
+                                onChange={(e) => setCourtType({ ...courtType, sportId: e.value })}
+                                optionLabel="name"
+                                placeholder="Selecione um Esporte"
+                            />
+                        </div>
+                    )}
                 </Dialog>
 
                 <ConfirmDialog />
