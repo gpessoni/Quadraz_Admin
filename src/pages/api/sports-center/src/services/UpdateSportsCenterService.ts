@@ -18,7 +18,6 @@ export default async function updateSportsCenterService(req: NextApiRequest, res
 
         const {
             name,
-            description,
             address,
             neighborhood,
             number,
@@ -32,8 +31,6 @@ export default async function updateSportsCenterService(req: NextApiRequest, res
             opensOnHolidays,
             parkingCapacity,
             hasPlayground,
-            playgroundObs,
-            wifiPassword,
         } = req.body
 
         const sport = await prisma.sportCenter.update({
@@ -42,7 +39,6 @@ export default async function updateSportsCenterService(req: NextApiRequest, res
             },
             data: {
                 name,
-                description,
                 address,
                 neighborhood,
                 number,
@@ -56,8 +52,6 @@ export default async function updateSportsCenterService(req: NextApiRequest, res
                 opensOnHolidays,
                 parkingCapacity,
                 hasPlayground,
-                playgroundObs,
-                wifiPassword,
             },
         })
 

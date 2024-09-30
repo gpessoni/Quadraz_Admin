@@ -53,9 +53,6 @@ export const CreateSportCenterSchema = Joi.object({
         "string.empty": `Has Playground cannot be an empty field`,
         "any.required": `Has Playground is a required field`,
     }),
-    playgroundObs: Joi.string().allow("").optional().messages({
-        "string.empty": `Playground Obs cannot be an empty field`,
-    }),
     opensOnHolidays: Joi.boolean().required().messages({
         "string.empty": `Opens on Holidays cannot be an empty field`,
         "any.required": `Opens on Holidays is a required field`,
@@ -108,7 +105,6 @@ export const UpdateSportCenterSchema = Joi.object({
         "string.empty": `Has Wifi cannot be an empty field`,
         "any.required": `Has Wifi is a required field`,
     }),
-    wifiPassword: Joi.string().optional(),
     hasParking: Joi.boolean().required().messages({
         "string.empty": `Has Parking cannot be an empty field`,
         "any.required": `Has Parking is a required field`,
@@ -116,9 +112,6 @@ export const UpdateSportCenterSchema = Joi.object({
     hasPlayground: Joi.boolean().required().messages({
         "string.empty": `Has Playground cannot be an empty field`,
         "any.required": `Has Playground is a required field`,
-    }),
-    playgroundObs: Joi.string().allow("").optional().messages({
-        "string.empty": `Playground Obs cannot be an empty field`,
     }),
     opensOnHolidays: Joi.boolean().required().messages({
         "string.empty": `Opens on Holidays cannot be an empty field`,
@@ -128,7 +121,6 @@ export const UpdateSportCenterSchema = Joi.object({
         "string.empty": `Parking Capacity cannot be an empty field`,
         "any.required": `Parking Capacity is a required field`,
     }),
-    logo: Joi.string().optional(),
 })
 
 export const DeleteSportCenterSchema = Joi.object({
