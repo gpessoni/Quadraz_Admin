@@ -53,7 +53,7 @@ const AdminNavbar = () => {
                     <S.NavLink href="/admin/dashboard">
                         <FontAwesomeIcon icon={faHome} /> Dashboard
                     </S.NavLink>
-                    <S.NavLink href="/admin/courts">
+                    <S.NavLink href="/sports_center">
                         <FontAwesomeIcon icon={faFutbol} /> Centros Esportivos
                     </S.NavLink>
                     <S.NavLink href="/admin/bookings">
