@@ -18,6 +18,7 @@ export default async function updateSportsCenterService(req: NextApiRequest, res
 
         const {
             name,
+            logo,
             address,
             neighborhood,
             number,
@@ -39,6 +40,7 @@ export default async function updateSportsCenterService(req: NextApiRequest, res
             },
             data: {
                 name,
+                logo,
                 address,
                 neighborhood,
                 number,

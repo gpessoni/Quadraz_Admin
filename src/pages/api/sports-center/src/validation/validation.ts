@@ -61,10 +61,15 @@ export const CreateSportCenterSchema = Joi.object({
         "string.empty": `Parking Capacity cannot be an empty field`,
         "any.required": `Parking Capacity is a required field`,
     }),
-    logo: Joi.string().optional(),
+    logo: Joi.string().base64().optional().allow(null).messages({
+        "string.base": "Imagem deve estar em formato Base64",
+    }),
 })
 
 export const UpdateSportCenterSchema = Joi.object({
+    logo: Joi.string().base64().optional().allow(null).messages({
+        "string.base": "Imagem deve estar em formato Base64",
+    }),
     name: Joi.string().required().messages({
         "string.empty": `Name cannot be an empty field`,
         "any.required": `Name is a required field`,

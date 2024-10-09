@@ -47,6 +47,8 @@ export default function SportsCenters() {
     const [loading, setLoading] = useState<boolean>(true)
     const [isLoading, setIsLoading] = useState(false)
 
+    const [logo, setLogo] = useState(null as any)
+
     const [sportsCenters, setSportsCenters] = useState<SportsCenter[]>([])
     const [sportsCenterDialog, setSportsCenterDialog] = useState<boolean>(false)
     const [sportsCenter, setSportsCenter] = useState<SportsCenter>({
@@ -54,6 +56,7 @@ export default function SportsCenters() {
         name: "",
         address: "",
         neighborhood: "",
+        logo: "",
         number: "",
         city: "",
         state: "",
@@ -135,6 +138,17 @@ export default function SportsCenters() {
         )
     }
 
+    const handleImageChange = (e: any) => {
+        const file = e.target.files[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setLogo(reader.result)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
     const openNew = () => {
         setSportsCenter({
             id: null,
@@ -167,12 +181,19 @@ export default function SportsCenters() {
 
         if (sportsCenter.name.trim()) {
             let _sportsCenter = [...sportsCenters]
+
             try {
                 console.log("Payload enviado:", JSON.stringify(sportsCenter))
 
                 const isUpdating = !!sportsCenter.id
 
-                const { id, cep, createdAt, updatedAt, description, logo, wifiPassword, playgroundObs, Court, ...sportsCenterData } = sportsCenter
+                // Extraindo apenas os campos válidos
+                const { id, cep, createdAt, updatedAt, description, wifiPassword, playgroundObs, Court, ...sportsCenterData } = sportsCenter
+
+                // Certificando-se que o logo está no formato Base64 ou o formato esperado
+                if (logo && logo.startsWith("data:image/")) {
+                    sportsCenterData.logo = logo.split(",")[1] // Remove o prefixo "data:image/png;base64,"
+                }
 
                 const response = await fetch(isUpdating ? `/api/sports-center/update/${sportsCenter.id}` : "/api/sports-center/create", {
                     method: isUpdating ? "PUT" : "POST",
@@ -180,7 +201,7 @@ export default function SportsCenters() {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${getAuthToken()}`,
                     },
-                    body: JSON.stringify(sportsCenterData), // Enviar apenas os dados válidos
+                    body: JSON.stringify(sportsCenterData), // Envia apenas os dados válidos
                 })
 
                 if (!response.ok) {
@@ -190,6 +211,7 @@ export default function SportsCenters() {
                 }
 
                 const result = await response.json()
+
                 if (!isUpdating) {
                     _sportsCenter.push(result)
                 } else {
@@ -202,8 +224,10 @@ export default function SportsCenters() {
                     detail: isUpdating ? "Centro Esportivo atualizado com sucesso" : "Centro Esportivo criado com sucesso",
                     life: 3000,
                 })
+
                 setSportsCenters(_sportsCenter)
                 setSportsCenterDialog(false)
+
                 setSportsCenter({
                     id: null,
                     name: "",
@@ -243,6 +267,7 @@ export default function SportsCenters() {
 
     const editSportsCenter = (sportsCenter: SportsCenter) => {
         setSportsCenter({ ...sportsCenter })
+        setLogo(`data:image/jpeg;base64,${sportsCenter.logo}`)
         setSportsCenterDialog(true)
     }
 
@@ -338,6 +363,32 @@ export default function SportsCenters() {
                     paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Centros Esportivos"
                 >
+                    <Column
+                        header="Imagem"
+                        body={(rowData) => {
+                            const imageSrc = rowData.logo ? `data:image/jpeg;base64,${rowData.logo}` : ""
+                            return (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        height: "80px",
+                                        width: "80px",
+                                        backgroundColor: rowData.logo ? "transparent" : "#f0f0f0",
+                                        borderRadius: "4px",
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    {rowData.logo ? (
+                                        <img src={imageSrc} alt={rowData.description} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+                                    ) : (
+                                        <i className="pi pi-image" style={{ fontSize: "2em", color: "#888" }}></i>
+                                    )}
+                                </div>
+                            )
+                        }}
+                    ></Column>
                     <Column field="name" header="Nome" sortable filter filterPlaceholder="Pesquisar por Nome" />
                     <Column field="city" header="Cidade" sortable filter filterPlaceholder="Pesquisar por Cidade" />
                     <Column field="state" header="Estado" sortable filter filterPlaceholder="Pesquisar por Estado" />
@@ -384,6 +435,36 @@ export default function SportsCenters() {
                 footer={sportsCenterDialogFooter}
                 onHide={hideDialog}
             >
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+                    <label
+                        htmlFor="image-upload"
+                        style={{
+                            cursor: "pointer",
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: "100px",
+                            height: "100px",
+                            backgroundColor: logo ? "transparent" : "#f0f0f0",
+                        }}
+                    >
+                        {logo ? (
+                            <img src={logo} alt="Produto" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                            <i className="pi pi-image" style={{ fontSize: "2em", color: "#888" }}></i>
+                        )}
+                        <input
+                            id="image-upload"
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            style={{ display: "none" }}
+                            onChange={handleImageChange}
+                        />
+                    </label>
+                </div>
+
                 <div className="p-field" style={{ marginBottom: "20px" }}>
                     <label htmlFor="name">Nome</label>
                     <InputText
@@ -397,7 +478,7 @@ export default function SportsCenters() {
 
                 <div className="p-field" style={{ marginBottom: "20px" }}>
                     <label htmlFor="cep">CEP</label>
-                    <InputMask id="cep" mask="99999-999" value={sportsCenter.cep} onChange={handleCepChange} required  />
+                    <InputMask id="cep" mask="99999-999" value={sportsCenter.cep} onChange={handleCepChange} required />
                 </div>
 
                 <div className="p-field" style={{ marginBottom: "20px" }}>
@@ -509,7 +590,7 @@ export default function SportsCenters() {
                 </div>
             </Dialog>
 
-            <ConfirmDialog/>
+            <ConfirmDialog />
         </>
     )
 }

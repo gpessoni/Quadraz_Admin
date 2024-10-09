@@ -14,6 +14,7 @@ export default async function createSportsCenterService(req: NextApiRequest, res
 
         const {
             name,
+            logo,
             description,
             address,
             neighborhood,
@@ -35,6 +36,7 @@ export default async function createSportsCenterService(req: NextApiRequest, res
         const sport = await prisma.sportCenter.create({
             data: {
                 name,
+                logo,
                 description,
                 address,
                 neighborhood,
