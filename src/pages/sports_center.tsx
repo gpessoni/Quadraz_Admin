@@ -49,6 +49,9 @@ export default function SportsCenters() {
 
     const [logo, setLogo] = useState(null as any)
 
+    const [selectedSportsCenter, setSelectedSportsCenter] = useState<SportsCenter | null>(null)
+    const [DetailsSportCenterDialog, setDetailsSportCenterDialog] = useState(false)
+
     const [sportsCenters, setSportsCenters] = useState<SportsCenter[]>([])
     const [sportsCenterDialog, setSportsCenterDialog] = useState<boolean>(false)
     const [sportsCenter, setSportsCenter] = useState<SportsCenter>({
@@ -174,6 +177,7 @@ export default function SportsCenters() {
     const hideDialog = () => {
         setSubmitted(false)
         setSportsCenterDialog(false)
+        setDetailsSportCenterDialog(false)
     }
 
     const saveSportsCenter = async () => {
@@ -333,6 +337,11 @@ export default function SportsCenters() {
         }
     }
 
+    const viewDetails = (sportsCenter: SportsCenter) => {
+        setSelectedSportsCenter(sportsCenter)
+        setDetailsSportCenterDialog(true)
+    }
+
     const sportsCenterDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-danger" onClick={hideDialog} />
@@ -389,29 +398,29 @@ export default function SportsCenters() {
                             )
                         }}
                     ></Column>
-                    <Column field="name" header="Nome" sortable filter filterPlaceholder="Pesquisar por Nome" />
-                    <Column field="city" header="Cidade" sortable filter filterPlaceholder="Pesquisar por Cidade" />
-                    <Column field="state" header="Estado" sortable filter filterPlaceholder="Pesquisar por Estado" />
+                    <Column field="name" header="Nome" sortable />
+                    <Column field="city" header="Cidade" sortable />
+                    <Column field="state" header="Estado" sortable />
+                    <Column field="address" header="Endereço" sortable />
+                    <Column field="phone" header="Telefone" sortable />
+                    <Column field="email" header="Email" sortable />
                     <Column
                         field="createdAt"
                         header="Criado em"
                         sortable
-                        filter
-                        filterPlaceholder="Pesquisar por Data de Criação"
                         body={(rowData: SportsCenter) => new Date(rowData.createdAt!).toLocaleDateString()}
                     />
                     <Column
                         field="updatedAt"
                         header="Atualizado em"
                         sortable
-                        filter
-                        filterPlaceholder="Pesquisar por Data de Atualização"
                         body={(rowData: SportsCenter) => new Date(rowData.updatedAt!).toLocaleDateString()}
                     />
                     <Column
                         header="Ações"
                         body={(rowData: SportsCenter) => (
                             <div className="flex gap-2">
+                                <Button icon="pi pi-eye" className="p-button-rounded p-button-info" onClick={() => viewDetails(rowData)} />
                                 <Button icon="pi pi-pencil" className="p-button-rounded p-button-success" onClick={() => editSportsCenter(rowData)} />
                                 <DeleteButton
                                     item={rowData}
@@ -428,7 +437,7 @@ export default function SportsCenters() {
             <Dialog
                 visible={sportsCenterDialog}
                 draggable={false}
-                style={{ width: "50vw" }}
+                style={{ width: "80vw" }}
                 header="Detalhes do Centro Esportivo"
                 modal
                 className="p-fluid"
@@ -474,11 +483,6 @@ export default function SportsCenters() {
                         required
                         autoFocus
                     />
-                </div>
-
-                <div className="p-field" style={{ marginBottom: "20px" }}>
-                    <label htmlFor="cep">CEP</label>
-                    <InputMask id="cep" mask="99999-999" value={sportsCenter.cep} onChange={handleCepChange} required />
                 </div>
 
                 <div className="p-field" style={{ marginBottom: "20px" }}>
@@ -591,6 +595,94 @@ export default function SportsCenters() {
             </Dialog>
 
             <ConfirmDialog />
+
+            <Dialog visible={DetailsSportCenterDialog} header="Detalhes do Centro Esportivo" modal onHide={hideDialog} className="dialog-box">
+                {selectedSportsCenter && (
+                    <div className="p-fluid grid">
+                        {/* Imagem */}
+                        <div className="p-col-12 p-md-6">
+                            {selectedSportsCenter.logo ? (
+                                <img
+                                    src={`data:image/jpeg;base64,${selectedSportsCenter.logo}`}
+                                    alt="Logo do Centro Esportivo"
+                                    style={{
+                                        width: "100%",
+                                        height: "auto",
+                                        maxHeight: "250px",
+                                        objectFit: "cover",
+                                        borderRadius: "8px",
+                                    }}
+                                />
+                            ) : (
+                                <div
+                                    style={{
+                                        width: "100%",
+                                        height: "250px",
+                                        backgroundColor: "#f0f0f0",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        borderRadius: "8px",
+                                    }}
+                                >
+                                    <i className="pi pi-image" style={{ fontSize: "3em", color: "#888" }}></i>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Informações detalhadas */}
+                        <div className="p-col-12 p-md-6">
+                            <div className="p-field">
+                                <h3>{selectedSportsCenter.name}</h3>
+                            </div>
+                            <div className="p-field">
+                                <p>
+                                    <strong>Endereço: </strong>
+                                    {`${selectedSportsCenter.address}, ${selectedSportsCenter.neighborhood}, Nº ${selectedSportsCenter.number}, ${selectedSportsCenter.city}, ${selectedSportsCenter.state}`}
+                                </p>
+                            </div>
+                            <div className="p-field">
+                                <p>
+                                    <strong>Email: </strong>
+                                    {selectedSportsCenter.email}
+                                </p>
+                            </div>
+                            <div className="p-field">
+                                <p>
+                                    <strong>Telefone: </strong>
+                                    {selectedSportsCenter.phone}
+                                </p>
+                            </div>
+                            <div className="p-field">
+                                <p>
+                                    <strong>Wi-Fi: </strong>
+                                    {selectedSportsCenter.hasWifi ? "Sim" : "Não"}
+                                </p>
+                            </div>
+                            <div className="p-field">
+                                <p>
+                                    <strong>Estacionamento: </strong>
+                                    {selectedSportsCenter.hasParking ? `Sim (Capacidade: ${selectedSportsCenter.parkingCapacity})` : "Não"}
+                                </p>
+                            </div>
+                            <div className="p-field">
+                                <p>
+                                    <strong>Playground: </strong>
+                                    {selectedSportsCenter.hasPlayground
+                                        ? `Sim (Observações: ${selectedSportsCenter.playgroundObs || "Nenhuma"})`
+                                        : "Não"}
+                                </p>
+                            </div>
+                            <div className="p-field">
+                                <p>
+                                    <strong>Abre em Feriados: </strong>
+                                    {selectedSportsCenter.opensOnHolidays ? "Sim" : "Não"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </Dialog>
         </>
     )
 }
